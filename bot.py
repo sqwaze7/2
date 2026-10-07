@@ -101,36 +101,43 @@ async def get_group_data(session, group_id):
 
 
 def build_message_from_cache() -> list[str]:
-    now = int(time.time())
     combined = list(zip(UNIVERSE_IDS, cached_games))
     combined.sort(key=lambda x: x[1][2], reverse=True)
     total_online = sum(r[2] for _, r in combined)
 
-    lines = ["## ** OUR GAMES **"]
-    for uid, (name, status, players, link) in combined:
+    games_header = "OUR GAMES" if len(combined) > 1 else "OUR GAME"
+    lines = [f"## **{games_header} **"]
+
+    for uid, (name, status, players, link, holder_id) in combined:
         icon = "🟢" if status else "🔴"
         status_text = "Active" if status else "Down"
+        game_link = link or f"https://www.roblox.com/games/{uid}"
         lines.append(
-            f"**{name}**\n"
-            f"> * Game Status: {status_text} {icon}\n"
-            f"> * Online: {players} 👥\n"
-            f"[JOIN GAME](<{link}>) 👈\n"
+            f"***{name}***\n"
+            f"> -# Game Status: {status_text} {icon}\n"
+            f"> -# Online: {players} 👥\n"
+            f"[__**JOIN GAME**__](<{game_link}>) \n"
         )
-    lines.append(f"**Total Online: {total_online} 👥**\n")
 
-    group_lines = []
-    for gid, (group_name, member_count, is_locked) in zip(GROUP_IDS, cached_groups):
-        if not is_locked:
+    lines.append(f"-# **Total Online: {total_online}** 👥")
+
+    valid_groups = [(gid, g) for gid, g in zip(GROUP_IDS, cached_groups) if not g[2]]
+    if valid_groups:
+        groups_header = "OUR GROUPS" if len(valid_groups) > 1 else "OUR GROUP"
+        total_members = sum(g[1] for _, g in valid_groups)
+        lines.append(f"## **{groups_header}**")
+
+        for gid, (group_name, member_count, is_locked, holder_id) in valid_groups:
             group_link = f"https://www.roblox.com/groups/{gid}"
-            group_lines.append(
-                f"**{group_name}**\n"
-                f"> * Members: {member_count:,} 👥\n"
-                f"[JOIN GROUP](<{group_link}>) 👈\n"
+            lines.append(
+                f"***{group_name}***\n"
+                f"> -# Members: {member_count:,} 👥\n"
+                f"[__**JOIN GROUP**__](<{group_link}>)\n"
             )
-    if group_lines:
-        lines.append("## \n** OUR GROUPS **")
-        lines.extend(group_lines)
 
+        lines.append(f"-# **Total Members: {total_members:,}** 👥")
+
+    now = int(time.time())
     lines.append(f"\n⏱ Last Update: <t:{now}:R>")
 
     content = "\n".join(lines)
