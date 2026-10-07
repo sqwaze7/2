@@ -108,7 +108,7 @@ def build_message_from_cache() -> list[str]:
     games_header = "OUR GAMES" if len(combined) > 1 else "OUR GAME"
     lines = [f"## **{games_header} **"]
 
-    for uid, (name, status, players, link, holder_id) in combined:
+    for uid, (name, status, players, link) in combined:
         icon = "🟢" if status else "🔴"
         status_text = "Active" if status else "Down"
         game_link = link or f"https://www.roblox.com/games/{uid}"
@@ -127,7 +127,7 @@ def build_message_from_cache() -> list[str]:
         total_members = sum(g[1] for _, g in valid_groups)
         lines.append(f"## **{groups_header}**")
 
-        for gid, (group_name, member_count, is_locked, holder_id) in valid_groups:
+        for gid, (group_name, member_count, is_locked) in valid_groups:
             group_link = f"https://www.roblox.com/groups/{gid}"
             lines.append(
                 f"***{group_name}***\n"
