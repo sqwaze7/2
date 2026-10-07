@@ -138,7 +138,7 @@ def build_message_from_cache() -> list[str]:
         lines.append(f"-# **Total Members: {total_members:,}** 👥")
 
     now = int(time.time())
-    lines.append(f"\n⏱ Last Update: <t:{now}:R>")
+    lines.append(f"-# **⏱ Last Update: <t:{now}:R>**")
 
     content = "\n".join(lines)
     chunks = []
