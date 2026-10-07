@@ -119,7 +119,7 @@ def build_message_from_cache() -> list[str]:
             f"[__**JOIN GAME**__](<{game_link}>) \n"
         )
 
-    lines.append(f"-# **Total Online: {total_online}** 👥")
+    lines.append(f"-# **Total Online: {total_online}** 👥\n")
 
     valid_groups = [(gid, g) for gid, g in zip(GROUP_IDS, cached_groups) if not g[2]]
     if valid_groups:
