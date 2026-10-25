@@ -62,8 +62,10 @@ async def get_game_full_data(session, universe_id):
     game_url = f"https://games.roblox.com/v1/games?universeIds={universe_id}"
     try:
         async with session.get(dev_url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            dev_status = resp.status
             dev_data = await resp.json()
         async with session.get(game_url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            game_status = resp.status
             game_data = await resp.json()
 
         name = dev_data.get("name", f"Game {universe_id}")
@@ -80,9 +82,33 @@ async def get_game_full_data(session, universe_id):
             players = entry.get("playing", 0)
         if removed and (name == "[TITLE UNAVAILABLE]" or not name):
             name = f"Game {universe_id}"
+
+        if not status:
+            reasons = []
+            if dev_status != 200:
+                reasons.append(f"develop API HTTP {dev_status}, errors={dev_data.get('errors')}")
+            if game_status != 200:
+                reasons.append(f"games API HTTP {game_status}, errors={game_data.get('errors')}")
+            if "isActive" not in dev_data:
+                reasons.append("isActive missing in develop response (default False used)")
+            elif not is_active:
+                reasons.append("isActive=False")
+            if "privacyType" not in dev_data:
+                reasons.append("privacyType missing in develop response (default Private used)")
+            elif privacy != "Public":
+                reasons.append(f"privacyType={privacy!r}")
+            if not has_game_data:
+                reasons.append("games API returned empty data (not in public listing)")
+            if removed:
+                reasons.append(
+                    f"is_place_removed=True (id={entry.get('id')}, name={entry.get('name')!r}, "
+                    f"creator={entry.get('creator')}, created={entry.get('created')})"
+                )
+            print(f"[DOWN] universe {universe_id} ({name}): " + " | ".join(reasons))
+
         return name, status, players, link
     except Exception as e:
-        print(f"Error fetching game {universe_id}: {e}")
+        print(f"[DOWN] universe {universe_id}: exception {type(e).__name__}: {e}")
         return f"Game {universe_id}", False, 0, None
 
 
