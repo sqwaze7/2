@@ -136,7 +136,7 @@ def build_message_from_cache() -> list[str]:
 
     for uid, (name, status, players, link) in combined:
         icon = "🟢" if status else "🔴"
-        status_text = "Active" if status else "Down"
+        status_text = "Active" if status else "Deleted"
         game_link = link or f"https://www.roblox.com/games/{uid}"
         lines.append(
             f"***{name}***\n"
